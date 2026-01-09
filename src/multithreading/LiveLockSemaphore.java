@@ -4,31 +4,17 @@ import java.util.concurrent.Semaphore;
 
 public class LiveLockSemaphore {
 
-    private static final Semaphore SEM = new Semaphore(1);
+    public static void main(String[] args) throws InterruptedException {
 
-    public static void main(String[] args) {
+        Semaphore semaphore = new Semaphore(1);
 
-        Runnable task1 = () -> {
-            while (true) {
-                if (SEM.tryAcquire()) {
-                    System.out.println("Thread-1 получил семафор и уступает");
-                    SEM.release();
-                }
-                Thread.yield();
-            }
-        };
+        Thread t1 = new Thread(new CommonSemaphore(semaphore, "Поток-1"));
+        Thread t2 = new Thread(new CommonSemaphore(semaphore, "Поток-2"));
 
-        Runnable task2 = () -> {
-            while (true) {
-                if (SEM.tryAcquire()) {
-                    System.out.println("Thread-2 получил семафор и уступает");
-                    SEM.release();
-                }
-                Thread.yield();
-            }
-        };
+        t1.start();
+        t2.start();
 
-        new Thread(task1).start();
-        new Thread(task2).start();
+        t1.join();
+        t2.join();
     }
 }

@@ -4,36 +4,18 @@ import java.util.concurrent.Semaphore;
 
 public class OneTwoSemaphore {
 
-    private static final Semaphore SEM_ONE = new Semaphore(1);
-    private static final Semaphore SEM_TWO = new Semaphore(0);
+    public static void main(String[] args) throws InterruptedException {
 
-    public static void main(String[] args) {
+        Semaphore semOne = new Semaphore(1);
+        Semaphore semTwo = new Semaphore(0);
 
-        Runnable printOne = () -> {
-            while (true) {
-                try {
-                    SEM_ONE.acquire();
-                    System.out.println("1");
-                    SEM_TWO.release();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        };
+        Thread t1 = new Thread(new CommonSemaphore("1", semOne, semTwo));
+        Thread t2 = new Thread(new CommonSemaphore("2", semTwo, semOne));
 
-        Runnable printTwo = () -> {
-            while (true) {
-                try {
-                    SEM_TWO.acquire();
-                    System.out.println("2");
-                    SEM_ONE.release();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        };
+        t1.start();
+        t2.start();
 
-        new Thread(printOne).start();
-        new Thread(printTwo).start();
+        t1.join();
+        t2.join();
     }
 }
